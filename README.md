@@ -19,6 +19,7 @@ ollama pull llama3.1
 
 ```bash
 pip install requests
+```
 
 ## Usage
 
@@ -26,12 +27,18 @@ Run the analyzer with default settings:
 
 ```bash
 python analyzer.py
-
+```
 
 You can specify a different model or input log file using CLI arguments: 
 
 ```bash
 python analyzer.py --model llama3.1 --input mylog.txt
+```
 
 The results will be saved in the `output/` directory, with the
 filename indicating which model was used (e.g., `output/result_llama3.1.json`)
+
+You can also set the `temperature` parameter:
+```bash
+python analyzer.py --temperature 0.3
+```
