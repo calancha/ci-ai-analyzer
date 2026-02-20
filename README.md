@@ -23,22 +23,29 @@ pip install requests
 
 ## Usage
 
-Run the analyzer with default settings:
+Run the analyzer with default settings (uses `llama3.1` and `example_logs/failure1.txt`):
 
 ```bash
 python analyzer.py
 ```
 
-You can specify a different model or input log file using CLI arguments: 
+### Advanced Options
+
+You can specify a different model, input log file, or temperature:
 
 ```bash
-python analyzer.py --model llama3.1 --input mylog.txt
+python analyzer.py --model llama3.1 --input mylog.txt --temperature 0.5
 ```
 
-The results will be saved in the `output/` directory, with the
-filename indicating which model was used (e.g., `output/result_llama3.1.json`)
+### Comparing Models
 
-You can also set the `temperature` parameter:
+The `--compare` flag allows you to run multiple models against the same log file for side-by-side evaluation:
+
 ```bash
-python analyzer.py --temperature 0.3
+python analyzer.py --compare llama3.1 codellama qwen2.5 --input failure_log.txt
 ```
+
+When using comparison mode:
+1. Individual results for each model are saved in the `output/` directory.
+2. A global `comparison_summary_tempX_X.json` is generated, containing all results for easy comparison.
+
