@@ -36,16 +36,32 @@ def sanitize(text: str) -> str:
     return text.replace(":", "_").replace("/", "_")
 
 
-def run_single_model(log_text: str, model: str, temperature: float) -> dict:
+def run_single_model(
+    log_text: str,
+    input_path: str,
+    model: str,
+    temperature: float
+) -> dict:
     result = analyze_log(log_text, model, temperature)
+
     model_safe = sanitize(model)
     temp_safe = str(temperature).replace(".", "_")
+
+    log_name = os.path.splitext(os.path.basename(input_path))[0]
+    log_name_safe = sanitize(log_name)
+
     os.makedirs("output", exist_ok=True)
-    output_file = f"output/result_{model_safe}_temp{temp_safe}.json"
+
+    output_file = (
+        f"output/result_{log_name_safe}_{model_safe}_temp{temp_safe}.json"
+    )
+
     with open(output_file, "w") as f:
         json.dump(result, f, indent=2)
+
     print(f"Model: {model}, Temperature: {temperature}")
     print(f"Output written to: {output_file}\n")
+
     return result
 
 
@@ -70,7 +86,7 @@ def main():
         print(f"Comparing models: {', '.join(args.compare)}")
         comparison_results = {}
         for model in args.compare:
-            result = run_single_model(log_text, model, args.temperature)
+            result = run_single_model(log_text, args.input, model, args.temperature)
             comparison_results[model] = result
         # optional: save full summary
         summary_file = f"output/comparison_summary_temp{str(args.temperature).replace('.', '_')
@@ -80,7 +96,7 @@ def main():
         print(f"Comparison summary written to: {summary_file}")
     else:
         model = args.model or "llama3.1"
-        run_single_model(log_text, model, args.temperature)
+        run_single_model(log_text, args.input, model, args.temperature)
 
 
 if __name__ == "__main__":
