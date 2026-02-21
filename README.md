@@ -37,6 +37,15 @@ You can specify a different model, input log file, or temperature:
 python analyzer.py --model llama3.1 --input mylog.txt --temperature 0.5
 ```
 
+### Multiple Runs
+
+You can execute the same analysis multiple times to evaluate output consistency:
+
+```bash
+python analyzer.py --runs 3
+```
+Each run will produce a separate output file.
+
 ### Comparing Models
 
 The `--compare` flag allows you to run multiple models against the same log file for side-by-side evaluation:
@@ -49,3 +58,13 @@ When using comparison mode:
 1. Individual results for each model are saved in the `output/` directory.
 2. A global `comparison_summary_tempX_X.json` is generated, containing all results for easy comparison.
 
+Output files are written to the `output/` directory and include:
+
+- input log name
+- model name
+- temperature
+- run number (if using `--runs`)
+
+Example:
+
+output/result_failure1_llama3.1_temp0_0_run1.json
