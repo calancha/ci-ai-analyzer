@@ -1,0 +1,9 @@
+Running with gitlab-runner 16.5.0
+Preparing the "kubernetes" executor
+Using Kubernetes namespace: ci-pipelines
+Waiting for pod ci-runner/project-123-concurrent-0 to be running, status is Pending
+
+Warning  FailedScheduling  2m10s  default-scheduler  0/5 nodes are available: 
+5 Insufficient memory.
+
+ERROR: Job failed (system failure): pod failed to start
