@@ -40,7 +40,8 @@ def run_single_model(
     log_text: str,
     input_path: str,
     model: str,
-    temperature: float
+    temperature: float,
+    run_id: int = 1,
 ) -> dict:
     result = analyze_log(log_text, model, temperature)
 
@@ -53,50 +54,85 @@ def run_single_model(
     os.makedirs("output", exist_ok=True)
 
     output_file = (
-        f"output/result_{log_name_safe}_{model_safe}_temp{temp_safe}.json"
+        f"output/result_{log_name_safe}_{model_safe}"
+        f"_temp{temp_safe}_run{run_id}.json"
     )
 
     with open(output_file, "w") as f:
         json.dump(result, f, indent=2)
 
-    print(f"Model: {model}, Temperature: {temperature}")
-    print(f"Output written to: {output_file}\n")
+    print(
+        f"Model: {model}, Temp: {temperature}, Run: {run_id} → {output_file}"
+    )
 
     return result
 
 
 def main():
     parser = argparse.ArgumentParser(description="AI-assisted CI log analyzer")
-    parser.add_argument("--model", help="Single Ollama model to use (default: llama3.1)")
+    parser.add_argument(
+        "--model",
+        help="Single Ollama model to use (default: llama3.1)"
+    )
     parser.add_argument(
         "--compare",
         nargs="+",
         help="Compare multiple models on the same input log",
     )
     parser.add_argument(
-        "--temperature", type=float, default=0.0, help="Sampling temperature (default: 0.0)"
+        "--temperature",
+        type=float,
+        default=0.0,
+        help="Sampling temperature (default: 0.0)"
     )
-    parser.add_argument("--input", default="example_logs/failure1.txt", help="Path to log file")
+    parser.add_argument(
+        "--input",
+        default="example_logs/failure1.txt",
+        help="Path to log file"
+    )
+    parser.add_argument(
+        "--runs",
+        type=int,
+        default=1,
+        help="Number of runs per model (default: 1)",
+    )
+
     args = parser.parse_args()
 
     with open(args.input) as f:
         log_text = f.read()
 
+    models = args.compare if args.compare else [args.model or "llama3.1"]
+
     if args.compare:
-        print(f"Comparing models: {', '.join(args.compare)}")
-        comparison_results = {}
-        for model in args.compare:
-            result = run_single_model(log_text, args.input, model, args.temperature)
-            comparison_results[model] = result
-        # optional: save full summary
-        summary_file = f"output/comparison_summary_temp{str(args.temperature).replace('.', '_')
-        }.json"
+        print(f"Comparing models: {', '.join(models)}")
+
+    all_results = {}
+
+    for model in models:
+        model_runs = []
+        for run_id in range(1, args.runs + 1):
+            result = run_single_model(
+                log_text,
+                args.input,
+                model,
+                args.temperature,
+                run_id,
+            )
+            model_runs.append(result)
+
+        all_results[model] = model_runs
+
+    # Save summary if multiple runs or compare
+    if args.compare or args.runs > 1:
+        summary_file = (
+            f"output/summary_temp{str(args.temperature).replace('.', '_')}.json"
+        )
         with open(summary_file, "w") as f:
-            json.dump(comparison_results, f, indent=2)
-        print(f"Comparison summary written to: {summary_file}")
-    else:
-        model = args.model or "llama3.1"
-        run_single_model(log_text, args.input, model, args.temperature)
+            json.dump(all_results, f, indent=2)
+
+        print(f"\nSummary written to: {summary_file}")
+
 
 
 if __name__ == "__main__":
